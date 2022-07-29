@@ -1,0 +1,50 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model List<string>
+
+<html>
+<head>
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        .container {
+            font-size: 0;
+            height: 100%;
+        }
+
+        .item {
+            display: inline-block;
+            vertical-align: top;
+            width: 50%;
+            height: 50%;
+            position: relative;
+            overflow: auto;
+        }
+
+        .right {
+            float: right;
+        }
+
+        img {
+            width: 100%;
+            object-fit: contain
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        @foreach(var id in Model)
+        {
+            <div class="item"><a asp-action="GetImage" asp-route-id="@id"><img class="right" src='@Url.Action("GetImage", new { id = id, thumb = true })' /></a></div>
+        }
+    </div>
+</body>
+
+</html>
