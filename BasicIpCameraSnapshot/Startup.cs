@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Generic;
 using System.Linq;
-using WebApplication4.Model;
+using BasicIpCamera.Model;
 
-namespace WebApplication4
+namespace BasicIpCamera
 {
     public class Startup
     {
@@ -20,18 +21,21 @@ namespace WebApplication4
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging();
+
             services.AddControllersWithViews();
-            services.AddHttpClient();
-            
-            services.AddSingleton<ISettings, Settings>(x => new Settings()
+            services.AddHttpClient("", x =>
             {
-                CacheTime = Configuration.GetSection("Camera").GetValue<int>("CacheTime"),
-                Cameras = Configuration.GetSection("Camera").GetSection("Cameras")
-                                       .GetChildren()
-                                       .ToDictionary(k => k.GetValue<string>("Id"), 
-                                                     v => (v.GetValue<string>("Credential"), v.GetValue<string>("Link")))
-            }
-            );
+                x.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64; rv:105.0) Gecko/20100101 Firefox/105.0");
+            });
+
+            services.Configure<Settings>(Configuration.GetSection("AppSettings"));
+
+            services.AddSingleton<Dictionary<string, WeatherData>>();
+
+            services.AddScoped<Weather>();
+
+            services.AddHostedService<RefreshWeather>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

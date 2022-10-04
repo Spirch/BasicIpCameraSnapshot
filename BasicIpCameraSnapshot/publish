@@ -1,0 +1,1 @@
+dotnet publish -v n -p:PublishProfile=FolderProfile

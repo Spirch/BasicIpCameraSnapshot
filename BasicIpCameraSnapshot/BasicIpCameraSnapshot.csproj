@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <CopyRefAssembliesToPublishDirectory>false</CopyRefAssembliesToPublishDirectory>
     <UserSecretsId>001655a6-a778-4a6e-b993-aac713d7083b</UserSecretsId>
-    <StartupObject>WebApplication4.Program</StartupObject>
+    <StartupObject>BasicIpCamera.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
