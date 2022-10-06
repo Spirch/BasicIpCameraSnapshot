@@ -100,7 +100,7 @@ namespace BasicIpCamera
 
             try
             {
-                using var sw = new LogRuntime(logger, $"PGetWeatherData Finish getting data for station {station.Name}");
+                using var sw = new LogRuntime(logger, $"GetWeatherData Finish getting data for station {station.Name}");
                 logger.LogInformation($"GetWeatherData Getting data for station {station.Name}");
                 bool retry = false;
 
