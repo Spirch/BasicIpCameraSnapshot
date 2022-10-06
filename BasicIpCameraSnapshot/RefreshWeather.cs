@@ -23,9 +23,14 @@ namespace BasicIpCamera
             _settingsChangedListener = settings.OnChange(MyOptionsChanged);
         }
 
-        private void MyOptionsChanged(Settings settings, string arg2)
+        private async void MyOptionsChanged(Settings settings, string arg2)
         {
             _settings = settings;
+
+            if(_settings.RefreshOnChange)
+            {
+                await Refresh();
+            }
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -37,28 +42,32 @@ namespace BasicIpCamera
 
             do
             {
-                using (var scope = _serviceScopeFactory.CreateScope())
-                {
-                    var logger = scope.ServiceProvider.GetService<ILogger<RefreshWeather>>();
-                    var weather = scope.ServiceProvider.GetRequiredService<Weather>();
-
-                    try
-                    {
-
-                        using var sw = new LogRuntime(logger, $"Executed");
-                        logger.LogInformation($"Executing {DateTime.Now}");
-                        await weather.Refresh();
-                    }
-                    catch(Exception ex)
-                    {
-                        logger.LogError(ex.Message);
-                        //do nothing
-                    }
-                }
+                await Refresh();
 
                 lastInterval = CheckInterval(lastInterval);
             }
             while (await timer.WaitForNextTickAsync(stoppingToken));
+        }
+
+        private async Task Refresh()
+        {
+            using (var scope = _serviceScopeFactory.CreateScope())
+            {
+                var logger = scope.ServiceProvider.GetService<ILogger<RefreshWeather>>();
+                var weather = scope.ServiceProvider.GetRequiredService<Weather>();
+
+                try
+                {
+                    using var sw = new LogRuntime(logger, $"Executed");
+                    logger.LogInformation($"Executing {DateTime.Now}");
+                    await weather.Refresh();
+                }
+                catch(Exception ex)
+                {
+                    logger.LogError(ex.Message);
+                    //do nothing
+                }
+            }
         }
 
         private int CheckInterval(int lastInterval)

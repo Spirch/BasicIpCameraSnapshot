@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
 using System.Linq;
 using BasicIpCamera.Model;
+using Microsoft.Extensions.Logging;
 
 namespace BasicIpCamera
 {
@@ -21,7 +22,15 @@ namespace BasicIpCamera
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddLogging();
+            services.AddLogging(loggingBuilder => 
+            {
+                loggingBuilder.ClearProviders();
+                loggingBuilder.AddSimpleConsole(formatterOptions =>
+                {
+                    formatterOptions.TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff   ";
+                    formatterOptions.SingleLine = true;
+                });
+            });
 
             services.AddControllersWithViews();
             services.AddHttpClient("", x =>

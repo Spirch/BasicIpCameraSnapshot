@@ -30,19 +30,34 @@ namespace BasicIpCamera
 
         public async Task Refresh()
         {
-            var camerasON = settings.Cameras.Where(x => x.Value.WeatherEnable).Select(x => x.Value).ToList();
             var camerasOFF = settings.Cameras.Where(x => !x.Value.WeatherEnable).Select(x => x.Value).ToList();
+            var camerasON = settings.Cameras.Where(x => x.Value.WeatherEnable).Select(x => x.Value).ToList();
 
             foreach(var station in settings.Weather.Stations)
             {
+                using var sw = new LogRuntime(logger, $"Processed station {station.Value.Name}");
                 logger.LogInformation($"Processing station {station.Value.Name}");
 
-                await UpdateOFF(station.Value, camerasOFF);
-                await UpdateON(station.Value, camerasON);
+                var weatherData = weatherDatas.Get(station.Value.Name);
+
+                await UpdateOFF(station.Value, camerasOFF, weatherData);
+                await UpdateON(station.Value, camerasON, weatherData);
             }
         }
 
-        private async Task UpdateON(StationData station, List<Camera> cameras)
+        private async Task UpdateOFF(StationData station, List<Camera> cameras, WeatherData weatherData)
+        {
+            if (cameras.Count == 0)
+            {
+                logger.LogInformation($"UpdateOFF No camera to do");
+                return;
+            }
+
+            await UpdateCameras(station, cameras, nameof(UpdateOFF));
+        }
+
+
+        private async Task UpdateON(StationData station, List<Camera> cameras, WeatherData weatherData)
         {
             if(cameras.Count == 0)
             {
@@ -50,120 +65,139 @@ namespace BasicIpCamera
                 return;
             }
 
-            if(!weatherDatas.TryGetValue(station.Name, out var weatherData))
-            {
-                weatherData = new();
-                weatherDatas.Add(station.Name, weatherData);
-            }
-
             if(!station.Enable)
             {
-                await UpdateOFF(station, cameras);
-                weatherData.LastUpdate = 0;
-                weatherData.LastDisplay = "";
+                await UpdateOFF(station, cameras, weatherData);
+                weatherData.Reset();
                 return;
             }
 
+            var data = await GetWeatherData(station, weatherData);
+
+            if(!weatherData.ForceRefresh && weatherData.LastRefresh >= weatherData.LastUpdate)
+            {
+                logger.LogWarning($"UpdateON Station {station.Name} same or older date {weatherData.LastRefresh} vs {weatherData.LastUpdate}");
+                return;
+            }
+
+            weatherData.LastRefresh = weatherData.LastUpdate;
+
+            if(!weatherData.ForceRefresh && weatherData.LastDisplay == weatherData.ToString())
+            {
+                logger.LogWarning($"UpdateON Station {station.Name} same data {weatherData.LastDisplay} vs {weatherData}");
+                return;
+            }
+
+            weatherData.ForceRefresh = false;
+            weatherData.LastDisplay = weatherData.ToString();
+
+            await UpdateCameras(station, cameras, nameof(UpdateON), weatherData.LastDisplay);
+        }
+
+        private async Task<string> GetWeatherData(StationData station, WeatherData weatherData)
+        {
+            string data = "";
+
             try
             {
-                logger.LogInformation($"UpdateON Getting data for station {station.Name}");
-                using var clientWeather = clientFactory.CreateClient();
-                var data = await clientWeather.GetStringAsync(station.Station);
+                using var sw = new LogRuntime(logger, $"PGetWeatherData Finish getting data for station {station.Name}");
+                logger.LogInformation($"GetWeatherData Getting data for station {station.Name}");
+                bool retry = false;
 
-                if(data[0] == '<')
-                {
-                    var weather = XElement.Parse(data);
-                    var current = weather.Descendants("currentConditions");
-                    
-                    weatherData.Condition = current.Select(x => x.Element("condition").Value).FirstOrDefault();
-                    weatherData.Temperature = current.Select(x => x.Element("temperature").Value).FirstOrDefault();
-                    weatherData.Humidity = current.Select(x => x.Element("relativeHumidity").Value).FirstOrDefault();
+                while(true)
+                    try
+                    {
+                        using var clientWeather = clientFactory.CreateClient();
+                        data = await clientWeather.GetStringAsync(station.Station);
+                        break;
+                    }
+                    catch(Exception ex)
+                    {
+                        if(retry)
+                        {
+                            throw;
+                        }
 
-                    var date = current.Descendants("dateTime");
-                    weatherData.LastUpdate = long.Parse(date.Select(x => x.Element("timeStamp").Value).FirstOrDefault());
-                }
-                else if(data[0] == '{')
-                {
-                    var weather = JsonNode.Parse(data);
-                    var current = weather["observation"];
+                        retry = true;
+                        logger.LogError($"GetWeatherData - will retry once - {ex.Message}");
+                    }
 
-                    weatherData.Condition = (string)current["weatherCode"]["text"];
-                    weatherData.Temperature = current["temperature"].ToString();
-                    weatherData.Humidity = current["relativeHumidity"].ToString();
-                    weatherData.LastUpdate = long.Parse(DateTime.Parse((string)current["time"]["local"]).ToString("yyyyMMddHHmm"));
-                }
+                ParseWeatherData(station, data, weatherData);
 
                 weatherData.Error = false;
             }
             catch(Exception ex)
             {
                 weatherData.Error = true;
-                logger.LogError($"UpdateON {ex.Message}");
+                weatherData.ForceRefresh = true;
+                logger.LogError($"GetWeatherData {ex.Message}");
             }
 
-            if(weatherData.LastRefresh >= weatherData.LastUpdate)
+            return data;
+        }
+
+        private void ParseWeatherData(StationData station, string data, WeatherData weatherData)
+        {
+            switch(station.Name.ToUpperInvariant())
             {
-                logger.LogWarning($"UpdateON Station {station.Name} same date");
-                return;
-            }
-
-            weatherData.LastRefresh = weatherData.LastUpdate;
-
-            if(weatherData.LastDisplay == weatherData.ToString())
-            {
-                logger.LogWarning($"UpdateON Station {station.Name} same data");
-                return;
-            }
-
-            weatherData.LastDisplay = weatherData.ToString();
-
-            using var clientCamera = clientFactory.CreateClient();
-            var content = new StringContent(
-                @$"     <?xml version=""1.0"" encoding=""UTF-8""?>
-                        <TextOverlayList>
-                                <TextOverlay>
-                                <id>{station.Line}</id>
-                                <enabled>true</enabled>
-                                <alignment>0</alignment>
-                                <positionX>{station.PosX}</positionX>
-                                <positionY>{station.PosY}</positionY>
-                                <displayText>{weatherData.LastDisplay}</displayText>
-                            </TextOverlay>
-                        </TextOverlayList>
-                ");
-
-            foreach(var cam in cameras)
-            {
-                logger.LogInformation($"UpdateON Updating camera {cam.Name} data for station {station.Name}");
-                string authString = Convert.ToBase64String(Encoding.UTF8.GetBytes(cam.Credential));
-                clientCamera.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authString);
-
-                using var response = await clientCamera.PutAsync($"{cam.BaseUrl}{cam.Weather}", content);
+                case "ECCC":
+                    ParseECCC(data, weatherData);
+                    break;
+                case "THEWEATHERNETWORK":
+                    ParseTheWeatherNetwork(data, weatherData);
+                    break;
+                default:
+                    throw new NotSupportedException($"ParseWeatherData of station {station.Name}");
             }
         }
 
-        private async Task UpdateOFF(StationData station, List<Camera> cameras)
+        private void ParseECCC(string data, WeatherData weatherData)
         {
-            if(cameras.Count == 0)
-            {
-                logger.LogInformation($"UpdateOFF No camera to do");
-                return;
-            }
+            var weather = XElement.Parse(data);
+            var current = weather.Descendants("currentConditions");
+            
+            weatherData.Condition = current.Select(x => x.Element("condition").Value).FirstOrDefault();
+            weatherData.Temperature = current.Select(x => x.Element("temperature").Value).FirstOrDefault();
+            weatherData.Humidity = current.Select(x => x.Element("relativeHumidity").Value).FirstOrDefault();
 
-            using var client = clientFactory.CreateClient();
+            var date = current.Descendants("dateTime");
+            weatherData.LastUpdate = long.Parse(date.Select(x => x.Element("timeStamp").Value).FirstOrDefault());
+        }
+
+        private void ParseTheWeatherNetwork(string data, WeatherData weatherData)
+        {
+            var weather = JsonNode.Parse(data);
+            var current = weather["observation"];
+
+            weatherData.Condition = (string)current["weatherCode"]["text"];
+            weatherData.Temperature = current["temperature"].ToString();
+            weatherData.Humidity = current["relativeHumidity"].ToString();
+            weatherData.LastUpdate = long.Parse(DateTime.Parse((string)current["time"]["local"]).ToString("yyyyMMddHHmm"));
+        }
+
+        private async Task UpdateCameras(StationData station, List<Camera> cameras, string caller, string lastDisplay = "")
+        {
+            var enable = lastDisplay != "" ? "true" : "false";
             var content = new StringContent(
                 @$"     <?xml version=""1.0"" encoding=""UTF-8""?>
                         <TextOverlayList>
                                 <TextOverlay>
                                 <id>{station.Line}</id>
-                                <enabled>false</enabled>
+                                <enabled>{enable}</enabled>
+                                <alignment>0</alignment>
+                                <positionX>{station.PosX}</positionX>
+                                <positionY>{station.PosY}</positionY>
+                                <displayText>{lastDisplay}</displayText>
                             </TextOverlay>
                         </TextOverlayList>
                 ");
 
-            foreach(var cam in cameras)
+            using var client = clientFactory.CreateClient();
+            
+            foreach (var cam in cameras)
             {
-                logger.LogInformation($"UpdateOFF Updating camera {cam.Name} data for station {station.Name}");
+                using var sw = new LogRuntime(logger, $"{caller} Updated camera {cam.Name} data for station {station.Name}");
+                logger.LogInformation($"{caller} Updating camera {cam.Name} data for station {station.Name}");
 
                 string authString = Convert.ToBase64String(Encoding.UTF8.GetBytes(cam.Credential));
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authString);

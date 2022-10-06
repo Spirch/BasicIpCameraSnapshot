@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using BasicIpCamera.Model;
 using Microsoft.Extensions.Logging;
 
 namespace BasicIpCamera
@@ -23,20 +25,18 @@ namespace BasicIpCamera
         }
     }
 
+
     public static class Tools
     {
-        public static void LogInfo(this ILogger logger)
+        public static WeatherData Get(this Dictionary<string, WeatherData> weatherDatas, string name)
         {
-            var sw = Stopwatch.StartNew();
-            var message = $"";
-            try
+            if(!weatherDatas.TryGetValue(name, out var weatherData))
             {
+                weatherData = new();
+                weatherDatas.Add(name, weatherData);
+            }
 
-            }
-            finally
-            {
-                logger.LogInformation($"{message} - {sw.Elapsed.TotalMilliseconds}ms");
-            }
+            return weatherData;
         }
     }
 }

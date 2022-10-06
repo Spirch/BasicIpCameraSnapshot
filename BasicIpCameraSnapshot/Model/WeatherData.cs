@@ -9,6 +9,19 @@ namespace BasicIpCamera.Model
         public long LastUpdate { get; set; }
         public string LastDisplay { get; set; }
         public long LastRefresh { get; set; }
+        public bool ForceRefresh  { get; set; }
+
+        public void Reset()
+        {
+            Condition = default;
+            Temperature = default;
+            Humidity = default;
+            Error = default;
+            LastUpdate = default;
+            LastDisplay = default;
+            LastRefresh = default;
+            ForceRefresh = default;
+        }
         
         public override string ToString()
         {
