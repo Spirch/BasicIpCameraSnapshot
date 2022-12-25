@@ -5,6 +5,8 @@ VisualStudioVersion = 17.2.32519.379
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BasicIpCameraSnapshot", "BasicIpCameraSnapshot\BasicIpCameraSnapshot.csproj", "{0EC52F91-04CF-4044-8F6F-36E76E31238D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherUpdate", "WeatherUpdate\WeatherUpdate.csproj", "{E34DC8A9-A9D9-485A-A226-D6456F33FA08}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0EC52F91-04CF-4044-8F6F-36E76E31238D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0EC52F91-04CF-4044-8F6F-36E76E31238D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0EC52F91-04CF-4044-8F6F-36E76E31238D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E34DC8A9-A9D9-485A-A226-D6456F33FA08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E34DC8A9-A9D9-485A-A226-D6456F33FA08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E34DC8A9-A9D9-485A-A226-D6456F33FA08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E34DC8A9-A9D9-485A-A226-D6456F33FA08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

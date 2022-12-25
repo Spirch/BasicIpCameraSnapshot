@@ -39,12 +39,6 @@ namespace BasicIpCamera
             });
 
             services.Configure<Settings>(Configuration.GetSection("AppSettings"));
-
-            services.AddSingleton<Dictionary<string, WeatherData>>();
-
-            services.AddScoped<Weather>();
-
-            services.AddHostedService<RefreshWeather>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

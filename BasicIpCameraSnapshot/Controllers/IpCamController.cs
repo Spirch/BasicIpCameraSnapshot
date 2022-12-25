@@ -20,7 +20,6 @@ namespace BasicIpCamera.Controllers
         private readonly Settings settings;
         private readonly ILogger<IpCamController> logger;
 
-
         public IpCamController(IOptionsMonitor<Settings> settings, ILogger<IpCamController> logger)
         {
             this.settings = settings.CurrentValue;

@@ -24,19 +24,4 @@ namespace BasicIpCamera
             logger.LogInformation($"{message} - {sw.Elapsed.TotalMilliseconds}ms");
         }
     }
-
-
-    public static class Tools
-    {
-        public static WeatherData Get(this Dictionary<string, WeatherData> weatherDatas, string name)
-        {
-            if(!weatherDatas.TryGetValue(name, out var weatherData))
-            {
-                weatherData = new();
-                weatherDatas.Add(name, weatherData);
-            }
-
-            return weatherData;
-        }
-    }
 }
