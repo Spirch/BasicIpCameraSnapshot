@@ -37,7 +37,7 @@ namespace WeatherUpdate.Model.WeatherNetwork
         public Wind wind { get; set; }
         public int relativeHumidity { get; set; }
         public Pressure pressure { get; set; }
-        public int visibility { get; set; }
+        public double visibility { get; set; }
         public int ceiling { get; set; }
     }
 

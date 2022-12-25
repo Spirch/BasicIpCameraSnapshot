@@ -11,7 +11,7 @@ await Host.CreateDefaultBuilder(args)
 {
     IConfiguration config = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
-            .AddEnvironmentVariables()
+            .AddJsonFile("appsettings.local.json", optional: true)
             .Build();
 
     services.AddLogging(loggingBuilder =>
