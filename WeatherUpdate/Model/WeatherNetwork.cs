@@ -17,7 +17,7 @@ namespace WeatherUpdate.Model.WeatherNetwork
 
         public override string ToString()
         {
-            return $"{observation.temperature}{display.unit.temperature}({observation.feelsLike}) {observation.relativeHumidity}{display.unit.relativeHumidity} {observation.wind.speed}({observation.wind.gust}){observation.wind.direction} {observation.weatherCode.overlay} ";
+            return $"{observation.temperature}{display.unit.temperature}({observation.feelsLike}) {observation.relativeHumidity}{display.unit.relativeHumidity} {observation.wind.speed}({observation.wind.gust}){observation.wind.direction} {observation.weatherCode.text} ";
         }
     }
 
