@@ -1,0 +1,26 @@
+﻿@using System.Collections.Specialized;
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model (string id, List<NameValueCollection> result)
+
+<html>
+<head>
+</head>
+
+<body>
+    <div class="container">
+        @if (Model.result?.Count > 0)
+        {
+            @foreach (var item in Model.result)
+            {
+                <div><a asp-action="GetPlayBack" asp-route-id="@Model.id" asp-route-starttime="@item.Get("starttime")" asp-route-endtime="@item.Get("endtime")" asp-route-name="@item.Get("name")" asp-route-size="@item.Get("size")">video</a></div>
+            }
+        }
+        else
+        {
+            <div>No Result</div>
+        }
+    </div>
+</body>
+
+</html>

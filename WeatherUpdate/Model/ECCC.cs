@@ -790,7 +790,7 @@ namespace WeatherUpdate.Model.ECCC
 
         public override string ToString()
         {
-            return $"{CurrentConditions.Temperature.Text}{CurrentConditions.Temperature.Units}({CurrentConditions.WindChill.Text}) {CurrentConditions.RelativeHumidity.Text}{CurrentConditions.RelativeHumidity.Units} {CurrentConditions.Wind.Speed.Text}({CurrentConditions.Wind.Gust.Text}){CurrentConditions.Wind.Direction.Text} {CurrentConditions.Condition} ";
+            return $"{CurrentConditions.Temperature?.Text}{CurrentConditions.Temperature?.Units}({CurrentConditions.WindChill?.Text}) {CurrentConditions.RelativeHumidity?.Text}{CurrentConditions.RelativeHumidity?.Units} {CurrentConditions.Wind?.Speed?.Text}({CurrentConditions.Wind?.Gust?.Text}){CurrentConditions.Wind?.Direction?.Text} {CurrentConditions.Condition} ";
         }
     }
 }
