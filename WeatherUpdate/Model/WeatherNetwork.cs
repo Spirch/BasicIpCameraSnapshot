@@ -37,14 +37,14 @@ namespace WeatherUpdate.Model.WeatherNetwork
         public Wind wind { get; set; }
         public int relativeHumidity { get; set; }
         public Pressure pressure { get; set; }
-        public double visibility { get; set; }
-        public int ceiling { get; set; }
+        public double? visibility { get; set; }
+        public int? ceiling { get; set; }
     }
 
     public sealed class Pressure
     {
         public double value { get; set; }
-        public int trendKey { get; set; }
+        public int? trendKey { get; set; }
     }
 
     public sealed class Time
@@ -77,6 +77,6 @@ namespace WeatherUpdate.Model.WeatherNetwork
     {
         public string direction { get; set; }
         public int speed { get; set; }
-        public int gust { get; set; }
+        public int? gust { get; set; }
     }
 }
