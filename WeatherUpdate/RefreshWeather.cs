@@ -26,7 +26,7 @@ public sealed class RefreshWeather : BackgroundService
 
         if (_settings.RefreshOnChange)
         {
-            await Refresh();
+            await Refresh(CancellationToken.None);
         }
     }
 
@@ -35,18 +35,18 @@ public sealed class RefreshWeather : BackgroundService
         int lastInterval = int.MinValue;
 
         if (_settings.Weather.DelayBeforeStart > 0)
-            await Task.Delay(_settings.Weather.DelayBeforeStart * 1000); //wait a little bit before starting the process
+            await Task.Delay(_settings.Weather.DelayBeforeStart * 1000, stoppingToken); //wait a little bit before starting the process
 
         do
         {
-            await Refresh();
+            await Refresh(stoppingToken);
 
             lastInterval = CheckInterval(lastInterval);
         }
         while (await timer.WaitForNextTickAsync(stoppingToken));
     }
 
-    private async Task Refresh()
+    private async Task Refresh(CancellationToken ct)
     {
         using (var scope = _serviceScopeFactory.CreateScope())
         {
@@ -57,7 +57,7 @@ public sealed class RefreshWeather : BackgroundService
             {
                 using var sw = new LogRuntime(logger, $"Executed");
                 logger.LogInformation($"Executing {DateTime.Now}");
-                await weather.Refresh();
+                await weather.Refresh(ct);
             }
             catch (Exception ex)
             {

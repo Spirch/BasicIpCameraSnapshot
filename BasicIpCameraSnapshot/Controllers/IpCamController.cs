@@ -95,10 +95,10 @@ namespace BasicIpCamera.Controllers
                 using var response = await client.SendAsync(request);
                 var content = await response.Content.ReadAsStringAsync();
 
-                XmlSerializer serializer = new XmlSerializer(typeof(CMSearchResult));
+                XmlSerializer serializer = new(typeof(CMSearchResult));
                 CMSearchResult searchResult = default;
 
-                using (StringReader reader = new StringReader(content))
+                using (StringReader reader = new(content))
                 {
                     searchResult = (CMSearchResult)serializer.Deserialize(reader);
                 }

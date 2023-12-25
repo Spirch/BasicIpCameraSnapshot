@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.Serialization;
@@ -28,7 +29,7 @@ public sealed class Weather
         this.weatherDatas = weatherDatas;
     }
 
-    public async Task Refresh()
+    public async Task Refresh(CancellationToken ct)
     {
         var camerasOFF = settings.Cameras.Where(x => !x.Value.WeatherEnable).Select(x => x.Value).ToList();
         var camerasON = settings.Cameras.Where(x => x.Value.WeatherEnable).Select(x => x.Value).ToList();
@@ -46,10 +47,10 @@ public sealed class Weather
             MergeCamData(camData, await UpdateON(station.Value, camerasON, weatherData));
         }
 
-        await UpdateCameras(camData);
+        await UpdateCameras(camData, ct);
     }
 
-    private async Task UpdateCameras(List<(string cam, string content)> camData)
+    private async Task UpdateCameras(List<(string cam, string content)> camData, CancellationToken ct)
     {
         if (camData.Count == 0)
         {
@@ -64,22 +65,21 @@ public sealed class Weather
                            setting
                        }).ToList();
 
-        using var client = clientFactory.CreateClient();
-
-        foreach (var update in updates)
+        await Parallel.ForEachAsync(updates, async (update, ct) => 
         {
             using var sw = new LogRuntime(logger, $"UpdateCameras Updated camera {update.setting.Name}");
 
             string authString = Convert.ToBase64String(Encoding.UTF8.GetBytes(update.setting.Credential));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authString);
-
             var data = string.Join("", update.cam.Select(x => x.content));
             var content = new StringContent(@$"<?xml version=""1.0"" encoding=""UTF-8""?><TextOverlayList>{data}</TextOverlayList>");
+
+            using var client = clientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authString);
             using var response = await client.PutAsync($"{update.setting.BaseUrl}{update.setting.Weather}", content);
-        }
+        });
     }
 
-    private void MergeCamData(List<(string cam, string content)> camData, List<(string cam, string content)> cams)
+    private static void MergeCamData(List<(string cam, string content)> camData, List<(string cam, string content)> cams)
     {
         if (cams?.Count > 0)
         {
@@ -178,7 +178,7 @@ public sealed class Weather
         return data;
     }
 
-    private void ParseWeatherData(StationData station, string data, WeatherData weatherData)
+    private static void ParseWeatherData(StationData station, string data, WeatherData weatherData)
     {
         switch (station.Name.ToUpperInvariant())
         {

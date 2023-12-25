@@ -13,7 +13,12 @@
         {
             @foreach (var item in Model.result)
             {
-                <div><a asp-action="GetPlayBack" asp-route-id="@Model.id" asp-route-starttime="@item.Get("starttime")" asp-route-endtime="@item.Get("endtime")" asp-route-name="@item.Get("name")" asp-route-size="@item.Get("size")">video</a></div>
+                <div>
+                    <a asp-action="GetPlayBack" asp-route-id="@Model.id" asp-route-starttime="@item.Get("starttime")" asp-route-endtime="@item.Get("endtime")" asp-route-name="@item.Get("name")" asp-route-size="@item.Get("size")">video</a>
+                    - @item.Get("starttime")
+                    - @item.Get("endtime")
+
+                </div>
             }
         }
         else
