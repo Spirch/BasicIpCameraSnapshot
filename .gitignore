@@ -366,3 +366,4 @@ FodyWeavers.xsd
 .vscode/tasks.json
 /WeatherUpdate/appsettings.local.json
 /BasicIpCameraSnapshot/appsettings.Development.json
+/GetDesktop/appsettings.Development.json
