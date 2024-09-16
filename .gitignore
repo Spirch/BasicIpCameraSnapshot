@@ -367,3 +367,4 @@ FodyWeavers.xsd
 /WeatherUpdate/appsettings.local.json
 /BasicIpCameraSnapshot/appsettings.Development.json
 /GetDesktop/appsettings.Development.json
+/PTZControl/appsettings.Development.json
