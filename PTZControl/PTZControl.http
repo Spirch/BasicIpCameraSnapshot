@@ -1,0 +1,18 @@
+@PTZControl_HostAddress = http://localhost:5248
+
+
+GET {{PTZControl_HostAddress}}/ptz/front/end
+Accept: application/json
+###
+
+GET {{PTZControl_HostAddress}}/ptz/front/voisin
+Accept: application/json
+###
+
+GET {{PTZControl_HostAddress}}/ptz/front/rue
+Accept: application/json
+###
+
+GET {{PTZControl_HostAddress}}/ptz/front/default
+Accept: application/json
+###

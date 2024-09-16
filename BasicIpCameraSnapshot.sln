@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeatherUpdate", "WeatherUpd
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GetDesktop", "GetDesktop\GetDesktop.csproj", "{68CDB745-6A2A-435D-A0B8-35C494E86E7F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PTZControl", "PTZControl\PTZControl.csproj", "{FE3A523F-503B-45AE-B756-424608598884}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{68CDB745-6A2A-435D-A0B8-35C494E86E7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68CDB745-6A2A-435D-A0B8-35C494E86E7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68CDB745-6A2A-435D-A0B8-35C494E86E7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE3A523F-503B-45AE-B756-424608598884}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE3A523F-503B-45AE-B756-424608598884}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE3A523F-503B-45AE-B756-424608598884}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE3A523F-503B-45AE-B756-424608598884}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
