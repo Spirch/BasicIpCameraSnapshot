@@ -3,7 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <CopyRefAssembliesToPublishDirectory>false</CopyRefAssembliesToPublishDirectory>
-    <UserSecretsId>001655a6-a778-4a6e-b993-aac713d7083b</UserSecretsId>
+      <ImplicitUsings>disable</ImplicitUsings>
+      <Nullable>annotations</Nullable>
     <StartupObject>BasicIpCamera.Program</StartupObject>
   </PropertyGroup>
 

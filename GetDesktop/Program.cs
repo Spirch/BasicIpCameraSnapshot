@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;

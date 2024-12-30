@@ -5,7 +5,6 @@
     <Nullable>annotations</Nullable>
     <ImplicitUsings>false</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <PublishAot>true</PublishAot>
   </PropertyGroup>
 
 </Project>

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -7,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace PTZControl;
 public class Program
@@ -26,9 +28,9 @@ public class Program
 
         var camera = app.Configuration.GetSection("Camera").Get<List<Camera>>();
 
-        foreach(var cam in camera)
+        foreach (var cam in camera)
         {
-            foreach(var preset in cam.Presets)
+            foreach (var preset in cam.Presets)
             {
                 app.MapGet($"ptz/{cam.Name}/{preset.Name}", async (IHttpClientFactory httpClientFactory) =>
                 {
@@ -40,7 +42,9 @@ public class Program
                     var result = await httpClient.PutAsync(uri, null);
                     result.EnsureSuccessStatusCode();
 
-                    return result.StatusCode;
+                    await Task.Delay(cam.WaitForRedirect * 1000);
+
+                    return Results.Redirect(cam.RedirectUri);
                 });
             }
         }
@@ -54,6 +58,8 @@ public class Camera
     public string Name { get; set; }
     public string Credential { get; set; }
     public string IP { get; set; }
+    public string RedirectUri { get; set; }
+    public int WaitForRedirect { get; set; }
     public List<Preset> Presets { get; set; }
 }
 
