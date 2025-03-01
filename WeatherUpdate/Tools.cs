@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
@@ -33,5 +34,12 @@ public static class Tools
         }
 
         return weatherData;
+    }
+
+    public static string Truncate(this string s, int length = 44)
+    {
+        if (s.Length > length) return s[..length];
+
+        return s;
     }
 }

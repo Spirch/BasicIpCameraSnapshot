@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -32,8 +35,10 @@ public class Program
         {
             foreach (var preset in cam.Presets)
             {
-                app.MapGet($"ptz/{cam.Name}/{preset.Name}", async (IHttpClientFactory httpClientFactory) =>
+                app.MapGet($"ptz/{cam.Name}/{preset.Name}", async (ILogger<Program> logger, HttpContext httpContext, IHttpClientFactory httpClientFactory) =>
                 {
+                    using var sw = new LogRuntime(logger, $"PTZ {cam.Name}/{preset.Name} IP:{httpContext.Connection.RemoteIpAddress}");
+
                     var httpClient = httpClientFactory.CreateClient();
                     string authString = Convert.ToBase64String(Encoding.UTF8.GetBytes(cam.Credential));
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authString);
@@ -73,4 +78,23 @@ public class Preset
 internal partial class AppJsonSerializerContext : JsonSerializerContext
 {
 
+}
+
+public class LogRuntime : IDisposable
+{
+    private readonly ILogger logger;
+    private readonly string message;
+    private Stopwatch sw;
+
+    public LogRuntime(ILogger logger, string message)
+    {
+        this.logger = logger;
+        this.message = message;
+        sw = Stopwatch.StartNew();
+    }
+
+    public void Dispose()
+    {
+        logger.LogInformation($"{message} - {sw.Elapsed.TotalMilliseconds}ms");
+    }
 }

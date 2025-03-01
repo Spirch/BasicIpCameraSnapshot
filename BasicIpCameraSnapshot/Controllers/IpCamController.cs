@@ -172,6 +172,7 @@ namespace BasicIpCamera.Controllers
             return NotFound();
         }
 
+        private static readonly SKSamplingOptions sampling = new(SKFilterMode.Linear, SKMipmapMode.Linear);
         private FileContentResult ProperSize(byte[] rawImage, bool thumb)
         {
             byte[] resizedRawImage = null;
@@ -179,10 +180,15 @@ namespace BasicIpCamera.Controllers
             if (thumb)
             {
                 using var original = SKBitmap.Decode(rawImage);
-                var resizeInfo = new SKImageInfo(original.Width / 4, original.Height / 4);
+                var resizeInfo = original.Info;
+                resizeInfo.Width /= 4;
+                resizeInfo.Height /= 4;
 
-                using var resized = original.Resize(resizeInfo, SKFilterQuality.High);
-                using var rawData = resized.Encode(SKEncodedImageFormat.Jpeg, 90);
+                using var destination = new SKBitmap(resizeInfo);
+
+                original.ScalePixels(destination, sampling);
+
+                using var rawData = destination.Encode(SKEncodedImageFormat.Jpeg, 90);
 
                 resizedRawImage = rawData.ToArray();
             }

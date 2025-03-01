@@ -1,0 +1,7 @@
+GET http://localhost:5169/linkage/all/1
+
+###
+GET http://localhost:5169/linkage/all
+
+###
+GET http://localhost:5169/linkage/onlyBack/1/on

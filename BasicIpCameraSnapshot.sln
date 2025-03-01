@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GetDesktop", "GetDesktop\Ge
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PTZControl", "PTZControl\PTZControl.csproj", "{FE3A523F-503B-45AE-B756-424608598884}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventLinkageControl", "EventLinkageControl\EventLinkageControl.csproj", "{E6C8D16E-7F95-4D2C-9480-42FFA0B9FC8D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{FE3A523F-503B-45AE-B756-424608598884}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE3A523F-503B-45AE-B756-424608598884}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE3A523F-503B-45AE-B756-424608598884}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6C8D16E-7F95-4D2C-9480-42FFA0B9FC8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6C8D16E-7F95-4D2C-9480-42FFA0B9FC8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6C8D16E-7F95-4D2C-9480-42FFA0B9FC8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6C8D16E-7F95-4D2C-9480-42FFA0B9FC8D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -26,9 +26,9 @@ public sealed class WeatherData
 
         if (Error)
         {
-            result += "Err";
+            result = result.Truncate(40) +  " Err";
         }
 
-        return result;
+        return result.Truncate();
     }
 }
