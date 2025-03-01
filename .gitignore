@@ -369,3 +369,4 @@ FodyWeavers.xsd
 /GetDesktop/appsettings.Development.json
 /PTZControl/appsettings.Development.json
 /EventLinkageControl/appsettings.Development.json
+/GetDesktop/.config/dotnet-tools.json
