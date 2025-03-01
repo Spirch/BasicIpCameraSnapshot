@@ -368,3 +368,4 @@ FodyWeavers.xsd
 /BasicIpCameraSnapshot/appsettings.Development.json
 /GetDesktop/appsettings.Development.json
 /PTZControl/appsettings.Development.json
+/EventLinkageControl/appsettings.Development.json
