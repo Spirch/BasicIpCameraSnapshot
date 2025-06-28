@@ -1,4 +1,6 @@
-﻿public sealed class Camera
+﻿namespace WeatherUpdate.Model;
+
+public sealed class Camera
 {
     public string Name { get; set; }
     public string Credential { get; set; }

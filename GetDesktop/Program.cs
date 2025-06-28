@@ -1,16 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
+using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
 
-namespace WebApplication2;
+namespace GetDesktop;
 
 public class Program
 {
@@ -20,12 +16,17 @@ public class Program
 
         var app = builder.Build();
 
-        app.MapGet("/Get/Desktop", (ILogger<Program> logger, HttpContext httpContext) =>
+        app.MapGet("/Get/Desktop", async (ILogger<Program> logger, HttpContext httpContext) =>
         {
             using var sw = new LogRuntime(logger, $"GetDesktop IP:{httpContext.Connection.RemoteIpAddress}");
 
             var mimeType = "image/png";
-            return Results.File(DPIUtil.GetDesktopScreen(), contentType: mimeType);
+            var stream = new MemoryStream();
+            DPIUtil.GetDesktopScreen(stream);
+
+            await Task.CompletedTask;
+
+            return Results.File(stream, contentType: mimeType);
         });
 
         app.Run();

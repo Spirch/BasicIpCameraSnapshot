@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Threading.Tasks;
+using WeatherUpdate;
+using WeatherUpdate.Model;
 
 await Host.CreateDefaultBuilder(args)
 .ConfigureServices((hostContext, services) =>
@@ -13,16 +12,6 @@ await Host.CreateDefaultBuilder(args)
             .AddJsonFile("appsettings.json")
             .AddJsonFile("appsettings.local.json", optional: true)
             .Build();
-
-    services.AddLogging(loggingBuilder =>
-    {
-        loggingBuilder.ClearProviders();
-        loggingBuilder.AddSimpleConsole(formatterOptions =>
-        {
-            formatterOptions.TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff   ";
-            formatterOptions.SingleLine = true;
-        });
-    });
 
     services.AddHttpClient("", x =>
     {

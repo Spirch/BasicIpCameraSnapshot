@@ -1,18 +1,17 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using System.Xml.Serialization;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using WeatherUpdate.Model;
+
+namespace WeatherUpdate;
 
 public sealed class Weather
 {
@@ -65,7 +64,7 @@ public sealed class Weather
                            setting
                        }).ToList();
 
-        await Parallel.ForEachAsync(updates, async (update, ct) => 
+        await Parallel.ForEachAsync(updates, async (update, ct) =>
         {
             using var sw = new LogRuntime(logger, $"UpdateCameras Updated camera {update.setting.Name}");
 
@@ -146,6 +145,7 @@ public sealed class Weather
             bool retry = false;
 
             while (true)
+            {
                 try
                 {
                     using var clientWeather = clientFactory.CreateClient();
@@ -163,6 +163,7 @@ public sealed class Weather
                     logger.LogError($"GetWeatherData - will retry once - {ex.Message}");
                     await Task.Delay(500); //wait half a second
                 }
+            }
 
             ParseWeatherData(station, data, weatherData);
 
@@ -182,15 +183,11 @@ public sealed class Weather
     {
         switch (station.Name.ToUpperInvariant())
         {
-            case "ECCC":
-                XmlSerializer serializer = new XmlSerializer(typeof(WeatherUpdate.Model.ECCC.SiteData));
-                using (StringReader reader = new StringReader(data))
-                {
-                    weatherData.SiteData = (WeatherUpdate.Model.ECCC.SiteData)serializer.Deserialize(reader);
-                }
+            case "ECCC_JSON":
+                weatherData.SiteData = JsonSerializer.Deserialize<List<Model.ECCC_JSON.Root>>(data).FirstOrDefault();
                 break;
             case "THEWEATHERNETWORK":
-                weatherData.SiteData = JsonSerializer.Deserialize<WeatherUpdate.Model.WeatherNetwork.SiteData>(data);
+                weatherData.SiteData = JsonSerializer.Deserialize<Model.WeatherNetwork.SiteData>(data);
                 break;
             default:
                 throw new NotSupportedException($"ParseWeatherData of station {station.Name}");

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 
+namespace WeatherUpdate.Model;
+
 public sealed class WeatherConf
 {
     public int DelayBeforeStart { get; set; }

@@ -1,6 +1,4 @@
-public interface ISiteData
-{    public long LastUpdate { get; }
-}
+namespace WeatherUpdate.Model;
 
 public sealed class WeatherData
 {
@@ -26,7 +24,7 @@ public sealed class WeatherData
 
         if (Error)
         {
-            result = result.Truncate(40) +  " Err";
+            result = result.Truncate(40) + " Err";
         }
 
         return result.Truncate();

@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Windows.Forms;
 
-namespace WebApplication2;
+namespace GetDesktop;
 
 public static class DPIUtil
 {
@@ -67,7 +67,7 @@ public static class DPIUtil
             };
             EnumDisplaySettings(screen.DeviceName, -1, ref dm);
 
-            yield return  Math.Round(Decimal.Divide(dm.dmPelsWidth, screen.Bounds.Width), 2);
+            yield return  Math.Round(decimal.Divide(dm.dmPelsWidth, screen.Bounds.Width), 2);
         }
 
         yield break;
@@ -76,7 +76,7 @@ public static class DPIUtil
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
     private static Size GetDesktopSize()
     {
-        var scale = DPIUtil.Scale().Min();
+        var scale = Scale().Min();
 
         var size = new Size
         {
@@ -88,7 +88,7 @@ public static class DPIUtil
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
-    public static byte[] GetDesktopScreen()
+    public static void GetDesktopScreen(MemoryStream stream)
     {
         var size = GetDesktopSize();
 
@@ -98,9 +98,7 @@ public static class DPIUtil
             g.CopyFromScreen(0, 0, 0, 0, bitmap.Size, CopyPixelOperation.SourceCopy);
         }
 
-        using var stream = new MemoryStream();
         bitmap.Save(stream, ImageFormat.Png);
-
-        return stream.ToArray();
+        stream.Position = 0;
     }
 }

@@ -1,8 +1,10 @@
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.Diagnostics;
-using Microsoft.Extensions.Logging;
+using WeatherUpdate.Model;
+
+namespace WeatherUpdate;
 
 public sealed class LogRuntime : IDisposable
 {

@@ -1,3 +1,5 @@
+namespace WeatherUpdate.Model;
+
 public sealed class StationData
 {
     public string Name { get; set; }
