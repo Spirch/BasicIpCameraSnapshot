@@ -1,3 +1,4 @@
+using CommonHelper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -20,7 +21,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
-using static System.Collections.Specialized.BitVector32;
 
 namespace EventLinkageControl;
 
@@ -143,25 +143,6 @@ public class Program
         using var xmlWriter = XmlWriter.Create(stringWriter, settings);
         serializer.Serialize(xmlWriter, obj, ns);
         return stringWriter.ToString();
-    }
-}
-
-public class LogRuntime : IDisposable
-{
-    private readonly ILogger logger;
-    private readonly string message;
-    private Stopwatch sw;
-
-    public LogRuntime(ILogger logger, string message)
-    {
-        this.logger = logger;
-        this.message = message;
-        sw = Stopwatch.StartNew();
-    }
-
-    public void Dispose()
-    {
-        logger.LogInformation($"{message} - {sw.Elapsed.TotalMilliseconds}ms");
     }
 }
 

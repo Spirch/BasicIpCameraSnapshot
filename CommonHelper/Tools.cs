@@ -1,12 +1,11 @@
+
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using WeatherUpdate.Model;
+using System.Text.RegularExpressions;
 
-namespace WeatherUpdate;
+namespace CommonHelper;
 
-public sealed class LogRuntime : IDisposable
+public class LogRuntime : IDisposable
 {
     private readonly ILogger logger;
     private readonly string message;
@@ -25,17 +24,23 @@ public sealed class LogRuntime : IDisposable
     }
 }
 
-public static class Tools
+public static class Helper
 {
-    public static WeatherData Get(this Dictionary<string, WeatherData> weatherDatas, string name)
-    {
-        if (!weatherDatas.TryGetValue(name, out var weatherData))
-        {
-            weatherData = new();
-            weatherDatas.Add(name, weatherData);
-        }
+    private readonly static Regex nameReg = new("^ch\\d{2}_\\d{17}$");
 
-        return weatherData;
+    public static string ToUniversalIso8601(this DateTime dateTime)
+    {
+        return dateTime.ToUniversalTime().ToString("u").Replace(" ", "T");
+    }
+
+    public static string StripUrl(this string url) 
+    { 
+        return url.Substring(url.IndexOf("?") + 1);
+    }
+
+    public static bool ValidName(this string name)
+    {
+        return nameReg.IsMatch(name);
     }
 
     public static string Truncate(this string s, int length = 44)

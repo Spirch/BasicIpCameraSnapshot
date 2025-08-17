@@ -1,3 +1,5 @@
+using CommonHelper;
+
 namespace WeatherUpdate.Model;
 
 public sealed class WeatherData

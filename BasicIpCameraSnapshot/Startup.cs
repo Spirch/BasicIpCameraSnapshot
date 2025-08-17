@@ -8,55 +8,42 @@ using System.Linq;
 using BasicIpCamera.Model;
 using Microsoft.Extensions.Logging;
 
-namespace BasicIpCamera
+namespace BasicIpCamera;
+
+public class Startup
 {
-    public class Startup
+    public Startup(IConfiguration configuration)
     {
-        public Startup(IConfiguration configuration)
+        Configuration = configuration;
+    }
+
+    public IConfiguration Configuration { get; }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddControllersWithViews();
+        services.AddHttpClient("", x =>
         {
-            Configuration = configuration;
-        }
+            x.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64; rv:105.0) Gecko/20100101 Firefox/105.0");
+        });
 
-        public IConfiguration Configuration { get; }
+        services.Configure<Settings>(Configuration.GetSection("AppSettings"));
+    }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
         {
-            services.AddLogging(loggingBuilder => 
-            {
-                loggingBuilder.ClearProviders();
-                loggingBuilder.AddSimpleConsole(formatterOptions =>
-                {
-                    formatterOptions.TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff   ";
-                    formatterOptions.SingleLine = true;
-                });
-            });
-
-            services.AddControllersWithViews();
-            services.AddHttpClient("", x =>
-            {
-                x.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Linux x86_64; rv:105.0) Gecko/20100101 Firefox/105.0");
-            });
-
-            services.Configure<Settings>(Configuration.GetSection("AppSettings"));
+            app.UseDeveloperExceptionPage();
         }
+        
+        app.UseRouting();
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        app.UseEndpoints(endpoints =>
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            
-            app.UseRouting();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-            });
-        }
+            endpoints.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+        });
     }
 }

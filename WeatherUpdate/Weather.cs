@@ -1,3 +1,4 @@
+using CommonHelper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -9,6 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using WeatherUpdate.Model;
 
 namespace WeatherUpdate;
@@ -40,7 +42,11 @@ public sealed class Weather
             using var sw = new LogRuntime(logger, $"Processed station {station.Value.Name}");
             logger.LogInformation($"Processing station {station.Value.Name}");
 
-            var weatherData = weatherDatas.Get(station.Value.Name);
+            if (!weatherDatas.TryGetValue(station.Value.Name, out var weatherData))
+            {
+                weatherData = new();
+                weatherDatas.Add(station.Value.Name, weatherData);
+            }
 
             MergeCamData(camData, UpdateOFF(station.Value, camerasOFF, weatherData));
             MergeCamData(camData, await UpdateON(station.Value, camerasON, weatherData));

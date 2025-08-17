@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 
-namespace BasicIpCamera.Model
+namespace BasicIpCamera.Model;
+
+public class Settings
 {
-    public class Settings
-    {
-        public int CacheTime { get; set; }
-        public Dictionary<string, Camera> Cameras { get; set; }
-    }
+    public int CacheTime { get; set; }
+    public Dictionary<string, Camera> Cameras { get; set; }
 }
