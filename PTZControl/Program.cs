@@ -40,9 +40,7 @@ public class Program
                 {
                     using var sw = new LogRuntime(logger, $"PTZ {cam.Name}/{preset.Name} IP:{httpContext.Connection.RemoteIpAddress}");
 
-                    var httpClient = httpClientFactory.CreateClient();
-                    string authString = Convert.ToBase64String(Encoding.UTF8.GetBytes(cam.Credential));
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authString);
+                    var httpClient = httpClientFactory.NewBasicCamHttpClient(cam.Credential);
 
                     var uri = $"http://{cam.IP}/ISAPI/PTZCtrl/channels/1/presets/{preset.Id}/goto";
                     var result = await httpClient.PutAsync(uri, null);

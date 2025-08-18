@@ -21,12 +21,17 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using static System.Collections.Specialized.BitVector32;
 
 namespace EventLinkageControl;
 
 public class Program
 {
+    private static readonly HashSet<string> validAction = ["on", "off"];
+
     private static readonly ConcurrentDictionary<string, string> eventXml = new();
+
+    //private static readonly ConcurrentDictionary<string, >
 
     public static void Main(string[] args)
     {
@@ -36,37 +41,47 @@ public class Program
 
         var app = builder.Build();
 
-        app.MapGet("linkage/{groupName}/{time?}", async (ILogger<Program> logger, HttpContext httpContext,
-                                                         IHttpClientFactory httpClientFactory, IConfiguration config,
-                                                         string groupName, int? time) =>
+        app.MapGet("linkage/{groupName}/{action}/{time?}", async (ILogger<Program> logger, HttpContext httpContext,
+                                                                  IHttpClientFactory httpClientFactory, IConfiguration config,
+                                                                  string groupName, string action, int? time) =>
         {
             using var sw = new LogRuntime(logger, $"linkage {groupName}/{time} IP:{httpContext.Connection.RemoteIpAddress}");
 
-            if (ValidateParams(config, groupName, time, out var args))
+            if (ValidateParams(config, groupName, action, time, out var args))
             {
                 var actions = await PrepareChangeLinkage(config, args.groups, args.action);
 
                 await ChangeLinkage(httpClientFactory, actions);
 
-                return "Ok";
+                await HandleTime(args);
+
+                return Results.Ok();
             }
 
-            return "Not Ok";
+            return Results.NotFound();
         });
 
         app.Run();
     }
 
-    private static bool ValidateParams(IConfiguration config, string groupName, int? time, out (List<string> groups, string action, int? time) args)
+    private static async Task HandleTime((List<string> groups, string action, int? time) args)
+    {
+        if(args.time.HasValue && args.time > 0)
+        {
+
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private static bool ValidateParams(IConfiguration config, string groupName, string action, int? time, out (List<string> groups, string action, int? time) args)
     {
 
-        if (time.HasValue && (time < 1 || time > 120))
+        if (time.HasValue && (time < 0 || time > 240) || !validAction.Contains(action))
         {
             args = new();
             return false;
         }
-
-        var action = time.HasValue ? "off" : "on";
 
         var group = config.GetSection("Group").Get<Dictionary<string, List<string>>>();
 
@@ -80,10 +95,10 @@ public class Program
         return false;
     }
 
-    private static async Task<Dictionary<Camera, List<(string, string)>>> PrepareChangeLinkage(IConfiguration config, List<string> groups, string action)
+    private static async Task<Dictionary<Camera, List<(string trigger, string xml)>>> PrepareChangeLinkage(IConfiguration config, List<string> groups, string action)
     {
         var cameras = config.GetSection("Cameras").Get<Dictionary<string, Camera>>();
-        var actions = new Dictionary<Camera, List<(string, string)>>();
+        var actions = new Dictionary<Camera, List<(string trigger, string xml)>>();
 
         foreach (var cam in cameras.Where(x => groups.Contains(x.Key)).Select(x => x.Value))
         {
@@ -101,19 +116,17 @@ public class Program
         return actions;
     }
 
-    private static async Task ChangeLinkage(IHttpClientFactory httpClientFactory, Dictionary<Camera, List<(string, string)>> actions)
+    private static async Task ChangeLinkage(IHttpClientFactory httpClientFactory, Dictionary<Camera, List<(string trigger, string xml)>> actions)
     {
         Parallel.ForEach(actions, async src =>
         {
-            var httpClient = httpClientFactory.CreateClient();
-            string authString = Convert.ToBase64String(Encoding.UTF8.GetBytes(src.Key.Credential));
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authString);
+            var httpClient = httpClientFactory.NewBasicCamHttpClient(src.Key.Credential);
             var baseUri = $"{src.Key.BaseUrl}{src.Key.Path}";
 
             foreach (var trigger in src.Value)
             {
-                var uri = baseUri + trigger.Item1 + "-1";
-                var content = new StringContent(trigger.Item2, Encoding.UTF8, "application/x-www-form-urlencoded");
+                var uri = baseUri + trigger.trigger + "-1";
+                var content = new StringContent(trigger.xml, Encoding.UTF8, "application/x-www-form-urlencoded");
                 var result = await httpClient.PutAsync(uri, content);
                 result.EnsureSuccessStatusCode();
 
@@ -145,82 +158,3 @@ public class Program
         return stringWriter.ToString();
     }
 }
-
-public class Settings
-{
-    public Dictionary<string, Camera> Cameras { get; set; }
-}
-
-public sealed class Camera
-{
-    public string Credential { get; set; }
-    public string BaseUrl { get; set; }
-    public string Path { get; set; }
-    public List<string> Triggers { get; set; }
-}
-
-
-public static class EventTriggerFactory
-{
-    public static EventTrigger NewEventTrigger(string eventType, string action)
-    {
-        return new EventTrigger()
-        {
-            Id = eventType + "-1",
-            EventType = eventType,
-            EventTriggerNotificationList = new()
-            {
-                EventTriggerNotification = string.Equals(action, "off", StringComparison.OrdinalIgnoreCase) ?
-                new()
-                {
-                    new() { Id = "center", NotificationMethod = "center" },
-                    new() { Id = "FTP", NotificationMethod = "FTP" },
-                } :
-                new()
-                {
-                    new() { Id = "email", NotificationMethod = "email" },
-                    new() { Id = "center", NotificationMethod = "center" },
-                    new() { Id = "FTP", NotificationMethod = "FTP" },
-                },
-            }
-        };
-    }
-}
-
-
-[XmlRoot(ElementName = "EventTriggerNotification")]
-public class EventTriggerNotification
-{
-
-    [XmlElement(ElementName = "id")]
-    public string Id { get; set; }
-
-    [XmlElement(ElementName = "notificationMethod")]
-    public string NotificationMethod { get; set; }
-}
-
-[XmlRoot(ElementName = "EventTriggerNotificationList")]
-public class EventTriggerNotificationList
-{
-
-    [XmlElement(ElementName = "EventTriggerNotification")]
-    public List<EventTriggerNotification> EventTriggerNotification { get; set; }
-}
-
-[XmlRoot(ElementName = "EventTrigger")]
-public class EventTrigger
-{
-
-    [XmlElement(ElementName = "id")]
-    public string Id { get; set; }
-
-    [XmlElement(ElementName = "eventType")]
-    public string EventType { get; set; }
-
-    [XmlElement(ElementName = "videoInputChannelID")]
-    public int VideoInputChannelID { get; set; } = 1;
-
-    [XmlElement(ElementName = "EventTriggerNotificationList")]
-    public EventTriggerNotificationList EventTriggerNotificationList { get; set; }
-}
-

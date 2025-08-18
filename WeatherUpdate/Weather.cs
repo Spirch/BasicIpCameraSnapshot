@@ -74,12 +74,11 @@ public sealed class Weather
         {
             using var sw = new LogRuntime(logger, $"UpdateCameras Updated camera {update.setting.Name}");
 
-            string authString = Convert.ToBase64String(Encoding.UTF8.GetBytes(update.setting.Credential));
+            using var client = clientFactory.NewBasicCamHttpClient(update.setting.Credential);
+
             var data = string.Join("", update.cam.Select(x => x.content));
             var content = new StringContent(@$"<?xml version=""1.0"" encoding=""UTF-8""?><TextOverlayList>{data}</TextOverlayList>");
 
-            using var client = clientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authString);
             using var response = await client.PutAsync($"{update.setting.BaseUrl}{update.setting.Weather}", content);
         });
     }

@@ -1,6 +1,9 @@
 
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace CommonHelper;
@@ -48,5 +51,13 @@ public static class Helper
         if (s.Length > length) return s[..length];
 
         return s;
+    }
+
+    public static HttpClient NewBasicCamHttpClient(this IHttpClientFactory clientFactory, string cred)
+    {
+        string authString = Convert.ToBase64String(Encoding.UTF8.GetBytes(cred));
+        var client = clientFactory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authString);
+        return client;
     }
 }

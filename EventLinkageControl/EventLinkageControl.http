@@ -4,4 +4,13 @@ GET http://localhost:5169/linkage/all/1
 GET http://localhost:5169/linkage/all
 
 ###
-GET http://localhost:5169/linkage/onlyBack/1/on
+GET http://localhost:5169/linkage/onlyBack/on
+
+###
+GET http://localhost:5169/linkage/front/1
+
+###
+GET http://localhost:5169/linkage/front/on
+
+###
+GET http://localhost:5169/linkage/onlyBack/off

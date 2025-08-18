@@ -34,15 +34,6 @@ public class IpCamController : Controller
         this.settings = settings.CurrentValue;
         this.logger = logger;
     }
-    private static string AuthString(Camera info) => Convert.ToBase64String(Encoding.UTF8.GetBytes(info.Credential));
-
-    private static HttpClient newHttpClient(IHttpClientFactory clientFactory, Camera info)
-    {
-        string authString = AuthString(info);
-        var client = clientFactory.CreateClient();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authString);
-        return client;
-    }
 
     private class CachedImage
     {
@@ -96,7 +87,7 @@ public class IpCamController : Controller
 
         if (settings.Cameras.TryGetValue(id, out Camera info))
         {
-            using HttpClient client = newHttpClient(clientFactory, info);
+            using HttpClient client = clientFactory.NewBasicCamHttpClient(info.Credential);
 
             using var request = new HttpRequestMessage(HttpMethod.Post, $"{info.BaseUrl}{info.Search}");
             request.Content = new StringContent($"<CMSearchDescription><searchID>{Guid.NewGuid()}</searchID><trackList><trackID>{info.TrackID}</trackID></trackList><timeSpanList><timeSpan><startTime>{startTime.ToUniversalIso8601()}</startTime><endTime>{endTime.ToUniversalIso8601()}</endTime></timeSpan></timeSpanList><maxResults>{max}</maxResults><searchResultPostion>{page}</searchResultPostion><metadataList><metadataDescriptor>//recordType.meta.std-cgi.com</metadataDescriptor></metadataList></CMSearchDescription>");
@@ -135,7 +126,7 @@ public class IpCamController : Controller
 
         if (settings.Cameras.TryGetValue(id, out Camera info))
         {
-            using HttpClient client = newHttpClient(clientFactory, info);
+            using HttpClient client = clientFactory.NewBasicCamHttpClient(info.Credential);
 
             using var request = new HttpRequestMessage(HttpMethod.Get, $"{info.BaseUrl}{info.Download}");
             request.Content = new StringContent($"<downloadRequest><playbackURI>{info.PlaybackUrl}/?starttime={starttime}&amp;endtime={endtime}&amp;name={name}&amp;size={size}</playbackURI></downloadRequest>");
@@ -157,7 +148,7 @@ public class IpCamController : Controller
 
         if (settings.Cameras.TryGetValue(id, out Camera info))
         {
-            using HttpClient client = newHttpClient(clientFactory, info);
+            using HttpClient client = clientFactory.NewBasicCamHttpClient(info.Credential);
 
             using var request = new HttpRequestMessage(HttpMethod.Get, $"{info.BaseUrl}{info.Picture}");
             using var response = await client.SendAsync(request);
