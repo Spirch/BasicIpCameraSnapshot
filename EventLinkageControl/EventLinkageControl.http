@@ -1,7 +1,7 @@
-GET http://localhost:5169/linkage/all/1
+GET http://localhost:5169/linkage/all/on
 
 ###
-GET http://localhost:5169/linkage/all
+GET http://localhost:5169/linkage/all/off
 
 ###
 GET http://localhost:5169/linkage/onlyBack/on
